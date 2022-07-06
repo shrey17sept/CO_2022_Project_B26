@@ -163,6 +163,6 @@ for line in input:
     if memCheck():machine(line)
     else:break
              
-if(count<=256)and(code==[] or code[-1]!='01010'+'0'*11+'\n'):error.append(f"{red('ERROR ->')} Expected {yellow('EOF')} {blue('<')} {blue('hlt')} {blue('>')} at line {vIndex+1}.\n")
-    
+if(count<=256)and(code==[] or code[-1]!='01010'+'0'*11+'\n'):error.append(f"{red('ERROR ->')} Expected {yellow('EOF')} {blue('<')} {blue('hlt')} {blue('>')} at line {vIndex+1}.\n")  
+
 print(*error,sep='') if (len(error)!=0) else print(*code,sep='')
