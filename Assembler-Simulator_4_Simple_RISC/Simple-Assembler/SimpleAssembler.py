@@ -14,7 +14,7 @@ def rCheck(Reg):
     return True
 
 def nCheck(Number):
-    if not(Number.isnumeric()) or float(Number)>255 or float(Number)<0 or('.' in Number):
+    if not(Number.isnumeric()) or float(Number)>255 or float(Number)<0 or ('.' in Number):
         error.append(f"{red('ERROR ->')} {yellow('Illegal')} immediate value {blue('<')} {blue(Number)} {blue('>')} at line {count}.\n\n")
         return False
     return True
@@ -61,7 +61,7 @@ def checklen(type, l):
     return False
 
 def checkname(name):
-    if(name in (encode['A'] or encode['B'] or encode['C'] or encode['D'] or encode['E'] or encode['F']) or name=='var'):
+    if((name in encode['A'])or(name in encode['B'])or(name in encode['C'])or(name in encode['D'])or(name in encode['E'])or(name in encode['F'])or(name=='var')):
         error.append(f"{red('ERROR ->')} {yellow('Reserved keyword')} declaration {blue('<')} {blue(name)} {blue('>')} at line {count} is forbidden.\n\n")
         return False    
     return True
@@ -105,6 +105,7 @@ def machine(line):
                     vFlag=False
                 if(letter=='B' and '$' not in l[2]):
                     letter='C'
+                if(letter=='R'):1/0
                 break   
 
         if(letter=='L'):
