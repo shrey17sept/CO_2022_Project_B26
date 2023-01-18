@@ -1,4 +1,4 @@
-import sys
+import sys;import math
 
 def yellow(str):return f"\033\033[0;33m{str}\033[0;0m"
 def red(str):return f"\033\033[31;1m{str}\033[0;0m"
@@ -12,6 +12,43 @@ def rCheck(Reg):
         error.append(f"{red('ERROR ->')} {yellow('Unexpected')} register value  {blue('<')} {blue(Reg)} {blue('>')} at line {count}.\n\n")
         return False
     return True
+
+def fCheck(num):
+    global count
+    man=''
+    temp=int(math.log(float(num),2))
+    exp=f"{temp:03b}"
+    fract=float(float(num)/2**(temp))-1
+
+    if(int(exp,2)>7):
+        error.append(f"{red('ERROR ->')} {yellow('Illegal')} immediate value {blue('<')} {blue(num)} {blue('>')} at line {count}.\n\n")
+        return '0'
+
+    COUNT = 0
+    while True:
+
+        if(fract==0.0):
+            man='00000'
+            break
+
+        fract *= 2
+        l = str(fract).split('.')
+        man += l[0]
+
+        if COUNT >= 5:
+            error.append(f"{red('ERROR ->')} {yellow('Mantissa Overflown')} for {blue('<')} {blue(num)} {blue('>')} at line {count}.\n\n")
+            return '0'
+
+        if fract == 1.0: 
+            break
+
+        fract = float('0.'+l[1])
+        COUNT += 1
+
+    n=len(man)
+    for i in range(5-n):
+        man+='0'
+    return exp+man
 
 def nCheck(Number):
     if not(Number.isnumeric()) or float(Number)>255 or float(Number)<0 or ('.' in Number):
@@ -117,13 +154,20 @@ def machine(line):
             return
             
         if(not(checklen(letter,l))):return
+
         if(letter=='A'):
             if(rCheck(l[1]) and rCheck(l[2]) and rCheck(l[3])):
                 code.append(encode[letter][l[0]]+'0'*2+encode['R'][l[1]]+encode['R'][l[2]]+encode['R'][l[3]]+'\n')
 
         elif(letter=='B'):
-            if(rCheck(l[1]) and nCheck(l[2][1::])):
-                code.append(encode[letter][l[0]]+encode['R'][l[1]]+f"{int(l[2][1::]):08b}"+'\n')
+            if(l[0]=='movf'):
+                num=fCheck(l[2][1::])
+                if num!='0':
+                    if(rCheck(l[1])):
+                        code.append(encode[letter][l[0]]+encode['R'][l[1]]+num+'\n')
+        
+            elif(rCheck(l[1]) and nCheck(l[2][1::])):
+                code.append(encode[letter][l[0]]+encode['R'][l[1]]+f"{int(l[2][1::]):08b}"+'\n')                
 
         elif(letter=='C'):
             if l[1]=='FLAGS' and l[0]=='mov':
@@ -143,16 +187,26 @@ def machine(line):
         elif(letter=='F'):
             hltINDEX=count;hFlag=True;vFlag=False;lFlag=False;code.append(encode[letter][l[0]]+'0'*11+'\n')  
 
+        elif(letter=='flt'):
+            if(rCheck(l[1]) and rCheck(l[2]) and rCheck(l[3])):
+                code.append(encode[letter][l[0]]+'0'*2+encode['R'][l[1]]+encode['R'][l[2]]+encode['R'][l[3]]+'\n')
+
         elif(letter=='V'):allocVariable(l[1])
 
     except IndexError:error.append(f"{red('ERROR ->')} Missing {yellow('required arguments')} for {blue('<')} {blue(l[0])} {blue('>')} at line {count}.\n\n")
     except:error.append(f"{red('ERROR ->')} {yellow('General syntax error')} at line {count}.\n\n")
 
-encode={'A':{'add':'10000','sub':'10001','mul':'10110','xor':'11010','or':'11011','and':'11100'},
-        'B':{'mov':'10010','rs':'11000','ls':'11001'},'C':{'mov':'10011','div':'10111','not':'11101','cmp':'11110'},
+encode={'A':{'add':'10000','sub':'10001','mul':'10110','xor':'11010','or':'11011','and':'11100','addf':'00000','subf':'00001'},
+        'B':{'mov':'10010','rs':'11000','ls':'11001','movf':'00010'},'C':{'mov':'10011','div':'10111','not':'11101','cmp':'11110'},
         'D':{'ld':'10100','st':'10101'},'E':{'jmp':'11111','jlt':'01100','jgt':'01101','je':'01111'},'F':{'hlt':'01010'},
         'R':{'R0':'000','R1':'001','R2':'010','R3':'011','R4':'100','R5':'101','R6':'110','FLAGS':'111'},'V':{'var':{}},'L':{}}     
 error=[];code=[];count=0;vFlag=True;hFlag=False;hltINDEX=0;vCount=0;input=[];undeclared=[];vIndex=0
+
+# with open ("C:\\Users\\vinay\\Desktop\\PA\\stdin.txt","r") as f:
+#     for line in f.readlines():
+#         if(line!='\n'):
+#             input.append(line.strip())
+#             if [str(x) for x in line.split()][0]!='var':vIndex+=1 
 
 for line in sys.stdin:
     if(line!='\n'):

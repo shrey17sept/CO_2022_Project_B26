@@ -1,2 +1,4 @@
 #!/bin/bash
-python3 SimpleAssembler.py $@
+
+# Add command to run your program here
+python3 SimpleAssembler.py
